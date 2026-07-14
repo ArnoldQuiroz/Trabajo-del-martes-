@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% block title %}Control de Reservas - RestaurantOS{% endblock %}
+{% block nav_reservas %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 font-bold text-white mb-0" style="display:flex; align-items:center; gap:0.5rem;">
+        <span class="material-symbols-outlined text-primary" style="font-size:2rem;">event_seat</span>
+        Control de Reservas
+    </h2>
+    <div class="d-flex gap-2">
+        {% if user.rol.nombre == 'ADMIN' %}
+        <a href="{% url 'configuracion_reservas' %}"
+            class="btn btn-outline-light rounded-pill px-4 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">settings</span> Configuración
+        </a>
+        {% endif %}
+        <a href="{% url 'crear_reserva' %}" class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
+            style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
+            <span class="material-symbols-outlined">add</span> Nueva Reserva
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show glass-card text-white border-0 border-start border-4 border-{{ message.tags|default:'primary' }}"
+        role="alert">
+        {{ message }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="glass-card card-dark overflow-hidden p-0">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0 align-middle">
+            <thead style="background: rgb(var(--surface));">
+                <tr>
+                    <th class="py-3 px-4 text-muted text-uppercase" style="font-size:0.75rem;">Fecha y Hora</th>
+                    <th class="py-3 px-4 text-muted text-uppercase" style="font-size:0.75rem;">Cliente</th>
+                    <th class="py-3 px-4 text-muted text-uppercase" style="font-size:0.75rem;">Mesa</th>
+                    <th class="py-3 px-4 text-muted text-uppercase" style="font-size:0.75rem;">Pax</th>
+                    <th class="py-3 px-4 text-muted text-uppercase" style="font-size:0.75rem;">Estado</th>
+                    <th class="py-3 px-4 text-muted text-uppercase text-end" style="font-size:0.75rem;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reserva in page_obj %}
+                <tr class="reserva-row" role="button" tabindex="0" style="cursor:pointer;"
+                    data-reserva-id="{{ reserva.id }}" data-codigo="#RES-{{ reserva.id|stringformat:'04d' }}"
+                    data-nombre="{{ reserva.cliente_nombre|escape }}"
+                    data-telefono="{{ reserva.cliente_telefono|default:''|escape }}"
+                    data-email="{{ reserva.cliente_email|default:''|escape }}"
+                    data-documento="{% if reserva.cliente %}{{ reserva.cliente.numero_documento|escape }}{% endif %}"
+                    data-fecha="{{ reserva.fecha|date:'d M Y' }}" data-hora="{{ reserva.hora|time:'h:i A' }}"
+                    data-mesa="{% if reserva.mesa %}Mesa {{ reserva.mesa.numero }} ({{ reserva.mesa.zona.nombre }}){% else %}Sin asignar{% endif %}"
+                    data-personas="{{ reserva.cantidad_personas }}"
+                    data-estado="{{ reserva.get_estado_display|escape }}" data-estado-key="{{ reserva.estado }}"
+                    data-observaciones="{{ reserva.observaciones|default:'Sin observaciones'|escape }}"
+                    data-platos="{% for item in reserva.platos.all %}{{ item.cantidad }}x {{ item.plato.nombre }}{% if not forloop.last %} · {% endif %}{% empty %}Sin platos seleccionados{% endfor %}"
+                    data-total="S/ {{ reserva.total_pedido|floatformat:2 }}"
+                    data-pedido-confirmado="{% if reserva.pedido_confirmado %}1{% else %}0{% endif %}"
+                    data-puede-llegada="{% if reserva.puede_confirmar_llegada %}1{% else %}0{% endif %}"
+                    data-cliente-llego="{% if reserva.cliente_llego %}1{% else %}0{% endif %}">
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-white">{{ reserva.fecha|date:"d M Y" }}</div>
+                        <div class="text-[0.8rem] text-primary font-bold">{{ reserva.hora|time:"h:i A" }}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-white">{{ reserva.cliente_nombre }}</div>
+                        <div class="text-[0.7rem] text-muted">{{ reserva.cliente_telefono }}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if reserva.mesa %}
+                        <span class="badge"
+                            style="background: rgb(var(--on-surface)/0.1); color: rgb(var(--on-surface));">
+                            Mesa {{ reserva.mesa.numero }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted" style="font-size:0.8rem;">Sin asignar</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="d-flex align-items-center gap-1 text-white">
+                            <span class="material-symbols-outlined" style="font-size:1rem;">group</span>
+                            {{ reserva.cantidad_personas }}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="badge rounded-pill px-3 py-2 
+                        {% if reserva.estado == 'CONFIRMADA' %}bg-success text-white
+                        {% elif reserva.estado == 'PENDIENTE' %}bg-warning text-dark
+                        {% elif reserva.estado == 'CANCELADA' %}bg-danger text-white
+                        {% elif reserva.estado == 'NO_ASISTIO' %}bg-secondary text-white
+                        {% elif reserva.estado == 'EN_MESA' %}bg-info text-dark
+                        {% else %}bg-primary text-white{% endif %}">
+                            {{ reserva.get_estado_display }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-end reserva-acciones" onclick="event.stopPropagation();">
+                        <div class="d-inline-flex flex-column flex-md-row align-items-end gap-2">
+                            {% if reserva.puede_confirmar_llegada %}
+                            <form method="POST" action="{% url 'confirmar_llegada_reserva' reserva.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
+                                    Confirmar llegada
+                                </button>
+                            </form>
+                            {% elif reserva.estado == 'CONFIRMADA' and not reserva.cliente_llego %}
+                            <span class="badge bg-dark text-warning small">Esperando cliente</span>
+                            {% elif reserva.estado == 'EN_MESA' %}
+                            <span class="badge bg-info text-dark small">Pedido en mesa</span>
+                            {% endif %}
+                            <form method="POST" action="{% url 'cambiar_estado_reserva' reserva.id %}"
+                                class="d-inline-flex gap-2">
+                                {% csrf_token %}
+                                <select name="estado" class="form-select form-select-sm w-auto glass-card py-1 font-bold 
+                                {% if reserva.estado == 'PENDIENTE' %}text-warning
+                                {% elif reserva.estado == 'CONFIRMADA' %}text-success
+                                {% elif reserva.estado == 'CANCELADA' %}text-danger
+                                {% elif reserva.estado == 'FINALIZADA' %}text-secondary
+                                {% else %}text-white{% endif %}" onchange="this.form.submit()" style="border: none;">
+                                    {% for est_key, est_val in estados %}
+                                    {% if reserva.estado == est_key %}
+                                    <option value="{{ est_key }}"
+                                        style="background-color: rgb(var(--surface)); color: white;" selected>
+                                        {{ est_val }}
+                                    </option>
+                                    {% else %}
+                                    <option value="{{ est_key }}"
+                                        style="background-color: rgb(var(--surface)); color: white;">
+                                        {{ est_val }}
+                                    </option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <span class="material-symbols-outlined d-block mb-3"
+                            style="font-size:3rem; opacity:0.5;">event_busy</span>
+                        No hay reservas registradas en el sistema.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="d-flex justify-content-center mt-4">
+    <nav>
+        <ul class="pagination pagination-sm"
+            style="--bs-pagination-bg: transparent; --bs-pagination-border-color: rgb(var(--border)/0.1); --bs-pagination-color: rgb(var(--on-surface));">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link glass-card"
+                    href="?page={{ page_obj.previous_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Anterior</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                {% if page_obj.number == num %}
+                <span class="page-link"
+                    style="background-color:rgb(var(--primary)); border-color:rgb(var(--primary)); color:rgb(var(--bg));">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a class="page-link glass-card"
+                    href="?page={{ num }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                    {{ num }}
+                </a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link glass-card"
+                    href="?page={{ page_obj.next_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+<!-- Modal detalle reserva -->
+<div class="modal fade" id="modalReservaDetalle" tabindex="-1" aria-labelledby="modalReservaDetalleLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-card card-dark border-0 text-white">
+            <div class="modal-header border-bottom border-white/10">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1" id="modalReservaDetalleLabel">Detalle de Reserva</h5>
+                    <p class="text-muted small mb-0" id="modalReservaCodigo"></p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-primary text-uppercase small fw-bold mb-3" style="letter-spacing:1px;">Datos del
+                            Cliente</h6>
+                        <div class="mb-3">
+                            <div class="text-muted small">Nombre completo</div>
+                            <div class="fw-bold fs-5" id="modalNombre"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">Teléfono</div>
+                            <div class="fw-semibold" id="modalTelefono"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">Correo electrónico</div>
+                            <div id="modalEmail"></div>
+                        </div>
+                        <div id="modalDocumentoWrap" class="mb-0">
+                            <div class="text-muted small">Documento</div>
+                            <div id="modalDocumento"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary text-uppercase small fw-bold mb-3" style="letter-spacing:1px;">Datos de
+                            la Reserva</h6>
+                        <div class="mb-3">
+                            <div class="text-muted small">Fecha y hora</div>
+                            <div class="fw-semibold" id="modalFechaHora"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">Mesa</div>
+                            <div class="fw-semibold" id="modalMesa"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">N° de personas</div>
+                            <div class="fw-semibold" id="modalPersonas"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">Estado</div>
+                            <div id="modalEstado"></div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="text-muted small">Observaciones</div>
+                            <div id="modalObservaciones" class="small"></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-muted small">Platos del pedido</div>
+                            <div id="modalPlatos" class="fw-semibold small"></div>
+                            <div class="text-primary small mt-1" id="modalTotal"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top border-white/10 d-flex flex-wrap gap-2 justify-content-between">
+                <a href="#" id="modalBtnLlamar"
+                    class="btn btn-success rounded-pill px-4 d-inline-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">call</span>
+                    Llamar al cliente
+                </a>
+                <div class="d-flex gap-2">
+                    <form method="POST" id="modalFormLlegada" class="d-none">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                            Confirmar llegada
+                        </button>
+                    </form>
+                    <a href="#" id="modalBtnConfirmarPedido" class="btn btn-outline-primary rounded-pill px-4 d-none">
+                        Confirmar pedido
+                    </a>
+                    <button type="button" class="btn btn-outline-light rounded-pill px-4"
+                        data-bs-dismiss="modal">Cerrar</button>
+                    <form method="POST" id="modalFormConfirmar" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="estado" value="CONFIRMADA">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"
+                            style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
+                            Confirmar reserva
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('modalReservaDetalle');
+        if (!modalEl) return;
+
+        const modal = new bootstrap.Modal(modalEl);
+        const estadoClasses = {
+            PENDIENTE: 'bg-warning text-dark',
+            CONFIRMADA: 'bg-success text-white',
+            CANCELADA: 'bg-danger text-white',
+            REPROGRAMADA: 'bg-primary text-white',
+            FINALIZADA: 'bg-secondary text-white',
+            NO_ASISTIO: 'bg-secondary text-white',
+            EN_MESA: 'bg-info text-dark',
+        };
+
+        function abrirDetalleReserva(row) {
+            const dataset = row.dataset;
+            document.getElementById('modalReservaCodigo').textContent = dataset.codigo;
+            document.getElementById('modalNombre').textContent = dataset.nombre || '—';
+            document.getElementById('modalTelefono').textContent = dataset.telefono || 'No registrado';
+            document.getElementById('modalEmail').textContent = dataset.email || 'No registrado';
+            document.getElementById('modalFechaHora').textContent = `${dataset.fecha} · ${dataset.hora}`;
+            document.getElementById('modalMesa').textContent = dataset.mesa || 'Sin asignar';
+            document.getElementById('modalPersonas').textContent = `${dataset.personas} persona(s)`;
+            document.getElementById('modalObservaciones').textContent = dataset.observaciones || 'Sin observaciones';
+            document.getElementById('modalPlatos').textContent = dataset.platos || 'Sin platos seleccionados';
+            document.getElementById('modalTotal').textContent = dataset.total ? `Total: ${dataset.total}` : '';
+
+            const estadoBadge = document.getElementById('modalEstado');
+            const estadoKey = dataset.estadoKey || '';
+            estadoBadge.innerHTML = `<span class="badge rounded-pill px-3 py-2 ${estadoClasses[estadoKey] || 'bg-primary text-white'}">${dataset.estado}</span>`;
+
+            const docWrap = document.getElementById('modalDocumentoWrap');
+            if (dataset.documento) {
+                docWrap.style.display = 'block';
+                document.getElementById('modalDocumento').textContent = dataset.documento;
+            } else {
+                docWrap.style.display = 'none';
+            }
+
+            const btnLlamar = document.getElementById('modalBtnLlamar');
+            if (dataset.telefono) {
+                btnLlamar.href = `tel:${dataset.telefono.replace(/\s/g, '')}`;
+                btnLlamar.classList.remove('disabled');
+                btnLlamar.style.pointerEvents = 'auto';
+            } else {
+                btnLlamar.href = '#';
+                btnLlamar.classList.add('disabled');
+                btnLlamar.style.pointerEvents = 'none';
+            }
+
+            const formConfirmar = document.getElementById('modalFormConfirmar');
+            formConfirmar.action = `/reservas/${dataset.reservaId}/estado/`;
+            formConfirmar.style.display = estadoKey === 'PENDIENTE' && dataset.pedidoConfirmado === '1' ? 'inline' : 'none';
+
+            const btnConfirmarPedido = document.getElementById('modalBtnConfirmarPedido');
+            const formLlegada = document.getElementById('modalFormLlegada');
+            if (estadoKey === 'PENDIENTE') {
+                btnConfirmarPedido.href = `/reservas/${dataset.reservaId}/pagar/`;
+                btnConfirmarPedido.textContent = 'Ir a pagar';
+                btnConfirmarPedido.classList.remove('d-none');
+            } else {
+                btnConfirmarPedido.classList.add('d-none');
+            }
+
+            if (dataset.puedeLlegada === '1') {
+                formLlegada.action = `/reservas/${dataset.reservaId}/confirmar-llegada/`;
+                formLlegada.classList.remove('d-none');
+            } else {
+                formLlegada.classList.add('d-none');
+            }
+
+            modal.show();
+        }
+
+        document.querySelectorAll('.reserva-row').forEach(function (row) {
+            row.addEventListener('click', function () {
+                abrirDetalleReserva(row);
+            });
+            row.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    abrirDetalleReserva(row);
+                }
+            });
+        });
+
+        setInterval(function () {
+            fetch('/reservas/api/verificar-no-show/')
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    if (data.liberadas > 0) {
+                        window.location.reload();
+                    }
+                })
+                .catch(function () { });
+        }, 30000);
+
+        // Conectar WebSocket para notificaciones en vivo de nuevas reservas
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const reservasSocket = new WebSocket(wsScheme + '://' + window.location.host + '/ws/admin/reservas/');
+        reservasSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.action === 'nueva_reserva') {
+                window.location.reload();
+            }
+        };
+    });
+</script>
+{% endblock %}

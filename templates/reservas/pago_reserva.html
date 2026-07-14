@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Pago de Reserva - RestaurantOS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="javascript:history.back()"
+                class="btn btn-outline-light rounded-circle p-2 d-flex align-items-center justify-content-center border-0"
+                style="width:40px; height:40px;">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="h4 font-bold text-white mb-0">Pago de Reserva</h2>
+                <p class="text-muted small mb-0">#RES-{{ reserva.id|stringformat:"04d" }} · {{ reserva.cliente_nombre }}</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} glass-card border-0 text-white mb-4">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="glass-card card-dark p-4 p-md-5 mb-4">
+            <h5 class="text-primary font-bold mb-3" style="font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;">
+                Resumen del pedido
+            </h5>
+            {% for item in reserva.platos.all %}
+            <div class="d-flex justify-content-between text-white small mb-2">
+                <span>{{ item.cantidad }}x {{ item.plato.nombre }}</span>
+                <span>S/ {{ item.subtotal|floatformat:2 }}</span>
+            </div>
+            {% endfor %}
+            <div class="border-top border-white/10 mt-3 pt-3 d-flex justify-content-between">
+                <span class="text-white fw-bold">Total a pagar</span>
+                <span class="text-primary fw-bold fs-5">S/ {{ reserva.total_pedido|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <div class="glass-card card-dark p-4 p-md-5">
+            <h5 class="text-primary font-bold mb-3" style="font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;">
+                Seleccione método de pago
+            </h5>
+
+            <form method="POST" id="formPagoReserva">
+                {% csrf_token %}
+                <input type="hidden" name="metodo_pago" id="metodoPagoInput" value="">
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <button type="button" class="btn w-100 p-4 rounded-3 border metodo-btn text-start"
+                            data-metodo="YAPE" style="background: rgb(var(--surface)); border-color: rgb(var(--border)/0.2) !important;">
+                            <div class="fw-bold text-white mb-1">Yape</div>
+                            <div class="text-muted small">Pago con QR</div>
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn w-100 p-4 rounded-3 border metodo-btn text-start"
+                            data-metodo="PLIN" style="background: rgb(var(--surface)); border-color: rgb(var(--border)/0.2) !important;">
+                            <div class="fw-bold text-white mb-1">Plin</div>
+                            <div class="text-muted small">Pago con QR</div>
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn w-100 p-4 rounded-3 border metodo-btn text-start"
+                            data-metodo="TARJETA" style="background: rgb(var(--surface)); border-color: rgb(var(--border)/0.2) !important;">
+                            <div class="fw-bold text-white mb-1">Tarjeta</div>
+                            <div class="text-muted small">Crédito / Débito</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="panelYape" class="pago-panel d-none mb-4 p-4 rounded-3" style="background: rgb(var(--surface));">
+                    <div class="text-white fw-semibold mb-2">Pagar con Yape</div>
+                    <p class="text-muted small mb-3">Realice el pago al número <strong class="text-white">{{ numero_yape }}</strong> y registre el código de operación.</p>
+                    <label class="form-label text-muted small">N° de operación Yape *</label>
+                    <input type="text" name="referencia" class="form-control rounded-lg campo-yape" placeholder="Ej: 001234567890">
+                </div>
+
+                <div id="panelPlin" class="pago-panel d-none mb-4 p-4 rounded-3" style="background: rgb(var(--surface));">
+                    <div class="text-white fw-semibold mb-2">Pagar con Plin</div>
+                    <p class="text-muted small mb-3">Realice el pago al número <strong class="text-white">{{ numero_plin }}</strong> y registre el código de operación.</p>
+                    <label class="form-label text-muted small">N° de operación Plin *</label>
+                    <input type="text" name="referencia" class="form-control rounded-lg campo-plin" placeholder="Ej: 001234567890" disabled>
+                </div>
+
+                <div id="panelTarjeta" class="pago-panel d-none mb-4 p-4 rounded-3" style="background: rgb(var(--surface));">
+                    <div class="text-white fw-semibold mb-3">Pagar con tarjeta</div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-muted small">Número de tarjeta *</label>
+                            <input type="text" class="form-control rounded-lg" id="numeroTarjeta" maxlength="19" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Titular *</label>
+                            <input type="text" name="titular_tarjeta" class="form-control rounded-lg" placeholder="Como aparece en la tarjeta">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Vencimiento</label>
+                            <input type="text" class="form-control rounded-lg" placeholder="MM/AA" maxlength="5">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">CVV</label>
+                            <input type="password" class="form-control rounded-lg" placeholder="***" maxlength="4">
+                        </div>
+                        <input type="hidden" name="ultimos_digitos_tarjeta" id="ultimosDigitosTarjeta">
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" id="btnConfirmarPago" class="btn btn-primary btn-lg rounded-pill font-bold py-3 d-none"
+                        style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
+                        Confirmar pago y reserva
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const metodoInput = document.getElementById('metodoPagoInput');
+    const btnConfirmar = document.getElementById('btnConfirmarPago');
+    const panels = document.querySelectorAll('.pago-panel');
+    const metodoBtns = document.querySelectorAll('.metodo-btn');
+    const numeroTarjeta = document.getElementById('numeroTarjeta');
+    const ultimosDigitos = document.getElementById('ultimosDigitosTarjeta');
+
+    function seleccionarMetodo(metodo) {
+        metodoInput.value = metodo;
+        panels.forEach(function (panel) { panel.classList.add('d-none'); });
+        document.querySelectorAll('[name="referencia"]').forEach(function (input) {
+            input.disabled = true;
+        });
+
+        metodoBtns.forEach(function (btn) {
+            btn.style.outline = btn.dataset.metodo === metodo ? '2px solid rgb(var(--primary))' : 'none';
+        });
+
+        if (metodo === 'YAPE') {
+            document.getElementById('panelYape').classList.remove('d-none');
+            document.querySelector('.campo-yape').disabled = false;
+        } else if (metodo === 'PLIN') {
+            document.getElementById('panelPlin').classList.remove('d-none');
+            document.querySelector('.campo-plin').disabled = false;
+        } else if (metodo === 'TARJETA') {
+            document.getElementById('panelTarjeta').classList.remove('d-none');
+        }
+
+        btnConfirmar.classList.remove('d-none');
+    }
+
+    metodoBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            seleccionarMetodo(btn.dataset.metodo);
+        });
+    });
+
+    document.getElementById('formPagoReserva').addEventListener('submit', function (event) {
+        if (!metodoInput.value) {
+            event.preventDefault();
+            alert('Seleccione un método de pago.');
+            return;
+        }
+        if (metodoInput.value === 'TARJETA' && numeroTarjeta) {
+            const digits = numeroTarjeta.value.replace(/\D/g, '');
+            ultimosDigitos.value = digits.slice(-4);
+        }
+    });
+});
+</script>
+{% endblock %}

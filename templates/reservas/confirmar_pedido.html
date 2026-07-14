@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Confirmar Pedido - RestaurantOS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% if request.user.perfil_cliente %}#{% else %}{% url 'lista_reservas' %}{% endif %}"
+                onclick="{% if request.user.perfil_cliente %}history.back(); return false;{% endif %}"
+                class="btn btn-outline-light rounded-circle p-2 d-flex align-items-center justify-content-center border-0"
+                style="width:40px; height:40px;">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="h4 font-bold text-white mb-0">Confirmar Pedido</h2>
+                <p class="text-muted small mb-0">Reserva #RES-{{ reserva.id|stringformat:"04d" }} · {{ reserva.cliente_nombre }}</p>
+            </div>
+        </div>
+
+        <div class="glass-card card-dark p-4 p-md-5 mb-4">
+            <div class="row g-3 small">
+                <div class="col-md-4">
+                    <div class="text-muted">Fecha y hora</div>
+                    <div class="text-white fw-semibold">{{ reserva.fecha|date:"d M Y" }} · {{ reserva.hora|time:"H:i" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted">Mesa</div>
+                    <div class="text-white fw-semibold">{% if reserva.mesa %}Mesa {{ reserva.mesa.numero }}{% else %}Sin asignar{% endif %}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-muted">Personas</div>
+                    <div class="text-white fw-semibold">{{ reserva.cantidad_personas }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card card-dark p-4 p-md-5">
+            <form method="POST">
+                {% csrf_token %}
+                {% include 'reservas/_selector_platos.html' %}
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill font-bold py-3"
+                        style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
+                        Continuar al pago
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

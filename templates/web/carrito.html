@@ -1,0 +1,84 @@
+{% extends "web/base_publica.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="mb-10 flex border-b border-white/10 pb-4 gap-4 items-end">
+        <h1 class="text-3xl md:text-4xl font-black text-white">Tu Carrito</h1>
+        <p class="text-on-surface-variant font-medium text-sm mb-1"><span x-text="itemCount"></span> Productos</p>
+    </div>
+
+    <template x-if="items.length === 0">
+        <div class="text-center py-20 glass-card rounded-3xl border-dashed">
+            <span class="material-symbols-outlined text-border/20 text-6xl mb-4">production_quantity_limits</span>
+            <h2 class="text-2xl font-bold text-white mb-2">El carrito está vacío</h2>
+            <p class="text-on-surface-variant mb-6">Parece que aún no has agregado productos a tu orden.</p>
+            <a href="{% url 'clientes:menu' %}" class="btn-primary px-8 py-3 rounded-full inline-block">Ver Menú</a>
+        </div>
+    </template>
+
+    <template x-if="items.length > 0">
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+
+            <!-- Lista -->
+            <div class="flex-1 w-full space-y-4">
+                <template x-for="item in items" :key="item.id">
+                    <div class="glass-card p-4 rounded-3xl flex gap-4 items-center">
+                        <div
+                            class="w-20 h-20 bg-surface rounded-2xl overflow-hidden shrink-0 flex items-center justify-center">
+                            <template x-if="item.imagen">
+                                <img :src="item.imagen" :alt="item.nombre" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!item.imagen">
+                                <span class="material-symbols-outlined text-border/30">fastfood</span>
+                            </template>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-white font-bold text-sm sm:text-base leading-tight mb-1 truncate"
+                                x-text="item.nombre"></h3>
+                            <p class="text-secondary font-black">S/ <span x-text="item.precio"></span></p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface/50 p-1.5 rounded-xl border border-white/5">
+                            <button @click="updateQuantity(item.id, parseInt(item.cantidad) - 1)"
+                                class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg">
+                                <span class="material-symbols-outlined text-sm">remove</span>
+                            </button>
+                            <span class="font-bold text-sm w-4 text-center select-none text-white"
+                                x-text="item.cantidad"></span>
+                            <button @click="updateQuantity(item.id, parseInt(item.cantidad) + 1)"
+                                class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                            </button>
+                        </div>
+                        <button @click="removeItem(item.id)"
+                            class="text-on-surface-variant hover:text-red-400 p-2 ml-2 transition">
+                            <span class="material-symbols-outlined text-xl">delete</span>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Resumen -->
+            <div class="w-full lg:w-80 shrink-0">
+                <div class="glass-card rounded-3xl p-6 sticky top-24">
+                    <h3 class="text-lg font-bold text-white mb-6 border-b border-white/5 pb-4">Resumen</h3>
+                    <div class="flex justify-between items-center mb-4 text-sm">
+                        <span class="text-on-surface-variant font-medium">Subtotal</span>
+                        <span class="text-white font-bold">S/ <span x-text="cartTotal"></span></span>
+                    </div>
+                    <!-- TODO: Descuentos, taxes if apply -->
+                    <div class="flex justify-between items-center py-4 border-t border-white/10 mb-6">
+                        <span class="text-white font-black text-lg">Total</span>
+                        <span class="text-secondary font-black text-2xl">S/ <span x-text="cartTotal"></span></span>
+                    </div>
+
+                    <a href="{% url 'clientes:checkout' %}"
+                        class="btn-primary block w-full py-4 text-center rounded-2xl font-bold uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(198,191,255,0.3)]">
+                        Ir a Pagar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</div>
+{% endblock %}

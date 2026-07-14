@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}TICUY - Restaurante Campestre{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        :root {
+            color-scheme: dark;
+            --primary: 198 191 255;
+            --secondary: 78 222 163;
+            --bg: 12 14 20;
+            --surface: 26 29 39;
+            --border: 255 255 255;
+            --on-surface: 255 255 255;
+            --on-surface-variant: 165 165 177;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: rgb(var(--bg));
+            color: rgb(var(--on-surface));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-nav {
+            background: rgba(26, 29, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(26, 29, 39, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgb(var(--primary)), rgb(var(--secondary)));
+            color: rgb(var(--bg));
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .material-symbols-outlined {
+            display: inline-block;
+            width: 1em;
+            overflow: hidden;
+            white-space: nowrap;
+            line-height: 1;
+            vertical-align: -0.125em;
+            opacity: 0;
+        }
+
+        html.icons-ready .material-symbols-outlined {
+            opacity: 1;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "rgb(var(--primary) / <alpha-value>)",
+                        secondary: "rgb(var(--secondary) / <alpha-value>)",
+                        background: "rgb(var(--bg) / <alpha-value>)",
+                        surface: "rgb(var(--surface) / <alpha-value>)",
+                        "on-surface": "rgb(var(--on-surface) / <alpha-value>)",
+                        "on-surface-variant": "rgb(var(--on-surface-variant) / <alpha-value>)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        if (document.fonts && document.fonts.load) {
+            document.fonts.load('24px "Material Symbols Outlined"')
+                .then(() => document.documentElement.classList.add('icons-ready'))
+                .catch(() => {});
+        }
+    </script>
+</head>
+
+<body class="antialiased" x-data="cartState()">
+
+    <!-- Navbar -->
+    <nav class="{% block nav_class %}glass-nav sticky top-0 z-50{% endblock %}">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <a href="{% url 'index' %}" class="flex items-center gap-2">
+                    <div class="bg-gradient-to-br from-primary to-secondary p-1.5 rounded-lg flex">
+                        <span class="material-symbols-outlined text-background font-bold">restaurant</span>
+                    </div>
+                    <span class="text-lg font-black tracking-tight text-white">TICUY</span>
+                </a>
+
+                <!-- Links Desktop -->
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="{% url 'index' %}"
+                        class="text-sm font-semibold text-on-surface-variant hover:text-white transition">Inicio</a>
+                    <a href="{% url 'clientes:menu' %}"
+                        class="text-sm font-semibold text-on-surface-variant hover:text-white transition">Menú</a>
+                    <a href="{% url 'clientes:nueva_reserva' %}"
+                        class="text-sm font-semibold text-on-surface-variant hover:text-white transition">Reservar
+                        Mesa</a>
+
+                    <div class="w-px h-6 bg-white/10 mx-2"></div>
+
+                    <a href="{% url 'clientes:carrito' %}"
+                        class="relative text-on-surface-variant hover:text-white transition flex items-center">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        <span x-show="itemCount > 0" x-text="itemCount" x-cloak
+                            class="absolute -top-2 -right-2 bg-secondary text-background text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"></span>
+                    </a>
+
+                    {% if user.is_authenticated and user.rol.nombre == 'CLIENTE' %}
+                    <a href="{% url 'clientes:mis_reservas' %}"
+                        class="text-sm font-semibold text-on-surface hover:text-primary transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">person</span> {{
+                        user.perfil_cliente.nombres|default:user.username }}
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm font-bold text-red-400 hover:text-red-300">Salir</button>
+                    </form>
+                    {% elif user.is_authenticated and user.rol.nombre != 'CLIENTE' %}
+                    <a href="{% url 'dashboard' %}" class="text-sm font-semibold text-primary">Ir al Panel</a>
+                    {% else %}
+                    <a href="{% url 'login' %}"
+                        class="text-sm font-semibold text-on-surface-variant hover:text-white transition">Ingresar</a>
+                    <a href="{% url 'clientes:registro' %}"
+                        class="btn-primary px-4 py-1.5 rounded-full text-sm">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="glass-nav mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex justify-center items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">restaurant</span>
+                <span class="font-black text-white text-xl">TICUY</span>
+            </div>
+            <p class="text-on-surface-variant text-sm mb-4">Restaurante Campestre - El mejor sabor de la región.</p>
+            <div class="text-xs text-on-surface-variant/60">
+                &copy; 2026 TICUY. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function cartState() {
+            return {
+                items: [],
+                init() {
+                    const stored = localStorage.getItem('ticuy_cart');
+                    if (stored) {
+                        try {
+                            this.items = JSON.parse(stored);
+                        } catch (e) { }
+                    }
+                    this.$watch('items', val => {
+                        localStorage.setItem('ticuy_cart', JSON.stringify(val));
+                    });
+                },
+                get itemCount() {
+                    return this.items.reduce((sum, item) => sum + parseInt(item.cantidad), 0);
+                },
+                get cartTotal() {
+                    return this.items.reduce((sum, item) => sum + (parseFloat(item.precio) * item.cantidad), 0).toFixed(2);
+                },
+                addToCart(plato) {
+                    const exists = this.items.find(i => i.id === plato.id);
+                    if (exists) {
+                        exists.cantidad += 1;
+                    } else {
+                        this.items.push({
+                            id: plato.id,
+                            nombre: plato.nombre,
+                            precio: plato.precio,
+                            imagen: plato.imagen,
+                            cantidad: 1
+                        });
+                    }
+                    // Animación visual u opcional trigger
+                },
+                updateQuantity(id, qty) {
+                    const item = this.items.find(i => i.id === id);
+                    if (item) {
+                        item.cantidad = Math.max(1, qty);
+                    }
+                },
+                removeItem(id) {
+                    this.items = this.items.filter(i => i.id !== id);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

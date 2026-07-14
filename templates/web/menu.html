@@ -1,0 +1,189 @@
+{% extends "web/base_publica.html" %}
+{% load l10n %}
+
+{% block title %}Carta TICUY - Restaurante Campestre{% endblock %}
+
+{% block content %}
+<div x-data="{ q: '' }" class="bg-[#0a0b0f]">
+    <!-- Menu Hero -->
+    <section class="relative min-h-[62vh] overflow-hidden border-b border-white/10 text-white">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=90&w=1800"
+            alt="Carta de platos TICUY" class="absolute inset-0 h-full w-full object-cover">
+        <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.88),rgba(0,0,0,0.42),rgba(0,0,0,0.76))]"></div>
+        <div class="relative z-10 mx-auto flex min-h-[62vh] max-w-7xl items-end px-4 pb-14 pt-24 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <p class="text-xs font-black uppercase tracking-[0.34em] text-secondary">Carta TICUY</p>
+                <h1 class="mt-5 font-['Plus_Jakarta_Sans'] text-5xl font-black leading-tight sm:text-7xl">
+                    Elige, agrega y disfruta.
+                </h1>
+                <p class="mt-6 max-w-2xl text-lg leading-8 text-white/75">
+                    Platos preparados para compartir en mesa, retirar en tienda o llevar a casa. Una carta simple,
+                    visual y lista para ordenar.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Body -->
+    <section class="mx-auto max-w-7xl px-4 py-12 pb-36 sm:px-6 lg:px-8">
+        <div class="mb-10 grid gap-5 lg:grid-cols-[1fr_360px] lg:items-end">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-[#f0c15a]">Selección de la casa</p>
+                <h2 class="mt-3 text-3xl font-black text-white sm:text-5xl">Nuestra carta</h2>
+            </div>
+
+            <label class="relative block">
+                <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/45">search</span>
+                <input x-model.debounce.150ms="q" type="search" placeholder="Buscar plato"
+                    class="h-13 w-full rounded-none border border-white/15 bg-white/[0.06] py-4 pl-12 pr-4 text-sm font-semibold text-white placeholder:text-white/40 focus:border-secondary focus:ring-secondary">
+            </label>
+        </div>
+
+        <div class="grid gap-10 lg:grid-cols-[260px_1fr]">
+            <!-- Categorías -->
+            <aside class="lg:sticky lg:top-24 lg:self-start">
+                <div class="hidden border border-white/10 bg-white/[0.04] p-5 lg:block">
+                    <p class="mb-5 text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Categorías</p>
+                    <div class="space-y-1">
+                        {% for cat in categorias %}
+                        {% if cat.platos.all %}
+                        <a href="#cat-{{ cat.id }}"
+                            class="group flex items-center justify-between border-b border-white/10 py-4 text-sm font-black uppercase tracking-[0.12em] text-white/70 transition hover:text-white">
+                            <span>{{ cat.nombre }}</span>
+                            <span class="text-xs text-white/35 group-hover:text-secondary">{{ cat.platos.all|length }}</span>
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="hide-scroll flex gap-2 overflow-x-auto pb-3 lg:hidden">
+                    {% for cat in categorias %}
+                    {% if cat.platos.all %}
+                    <a href="#cat-{{ cat.id }}"
+                        class="shrink-0 border border-white/15 bg-white/[0.06] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white">
+                        {{ cat.nombre }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </aside>
+
+            <!-- Lista de Platos -->
+            <div class="space-y-16">
+                {% for cat in categorias %}
+                {% if cat.platos.all %}
+                <section id="cat-{{ cat.id }}" class="scroll-mt-28">
+                    <div class="mb-7 flex items-end justify-between gap-5 border-b border-white/10 pb-5">
+                        <div>
+                            <p class="text-[11px] font-black uppercase tracking-[0.24em] text-secondary">Categoría</p>
+                            <h3 class="mt-2 text-3xl font-black text-white">{{ cat.nombre }}</h3>
+                        </div>
+                        <span class="hidden text-sm font-bold text-white/40 sm:block">{{ cat.platos.all|length }} opciones</span>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        {% for plato in cat.platos.all %}
+                        <article
+                            data-name="{{ plato.nombre|lower }} {{ cat.nombre|lower }}"
+                            x-show="!q || $el.dataset.name.includes(q.toLowerCase())"
+                            x-transition.opacity
+                            class="group overflow-hidden border border-white/10 bg-[#151720] transition duration-300 hover:-translate-y-1 hover:border-white/25">
+                            <div class="relative aspect-[4/3] overflow-hidden bg-[#10121a]">
+                                {% if plato.imagen %}
+                                <img src="{{ plato.imagen_url }}" alt="{{ plato.nombre }}"
+                                    class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                {% else %}
+                                    {% if plato.nombre == 'Ceviche' %}
+                                    <img src="https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% elif plato.nombre == 'Lomo Saltado' %}
+                                    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% elif plato.nombre == 'Pisco Sour' %}
+                                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% elif cat.nombre == 'Bebidas' %}
+                                    <img src="https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% elif cat.nombre == 'Entradas' %}
+                                    <img src="https://images.unsplash.com/photo-1541014741259-de529411b96a?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% else %}
+                                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=85&w=900"
+                                        alt="{{ plato.nombre }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                    {% endif %}
+                                {% endif %}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
+                                    <div>
+                                        <p class="text-[11px] font-black uppercase tracking-[0.18em] text-white/55">{{ cat.nombre }}</p>
+                                        <h4 class="mt-1 text-2xl font-black leading-tight text-white">{{ plato.nombre }}</h4>
+                                    </div>
+                                    <p class="shrink-0 bg-white px-3 py-2 text-sm font-black text-black">S/ {{ plato.precio_actual }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex min-h-[132px] flex-col justify-between p-5">
+                                {% if plato.descripcion %}
+                                <p class="text-sm leading-7 text-on-surface-variant">{{ plato.descripcion }}</p>
+                                {% else %}
+                                <p class="text-sm leading-7 text-on-surface-variant">
+                                    Preparado al momento con sabor de casa y una presentación pensada para abrir el apetito.
+                                </p>
+                                {% endif %}
+
+                                <div class="mt-5 flex items-center justify-between gap-4">
+                                    <span class="text-xs font-black uppercase tracking-[0.18em] text-secondary">Disponible</span>
+                                    <button
+                                        @click="addToCart({ id: {{ plato.id }}, nombre: '{{ plato.nombre|escapejs }}', precio: {{ plato.precio_actual|unlocalize }}, imagen: '{{ plato.imagen_url|default:'' }}' })"
+                                        class="inline-flex h-11 items-center justify-center gap-2 border border-white/20 px-4 text-xs font-black uppercase tracking-[0.14em] text-white transition hover:border-secondary hover:bg-secondary hover:text-black">
+                                        <span>Agregar</span>
+                                        <span class="material-symbols-outlined text-base">add</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Barra flotante para ir al carrito -->
+<div x-show="itemCount > 0" x-transition.opacity
+    class="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-bg via-bg/95 to-transparent p-4 md:p-6">
+    <div
+        class="mx-auto flex max-w-2xl items-center justify-between border border-secondary/25 bg-[#11131b]/95 p-3 pl-5 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-sm font-black text-bg">
+                <span x-text="itemCount"></span>
+            </div>
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">Total</p>
+                <p class="text-xl font-black leading-none text-white">S/ <span x-text="cartTotal"></span></p>
+            </div>
+        </div>
+        <a href="{% url 'clientes:carrito' %}"
+            class="btn-primary inline-flex min-h-11 items-center justify-center gap-2 px-5 text-xs font-black uppercase tracking-[0.12em]">
+            Ver carrito
+            <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </a>
+    </div>
+</div>
+
+<style>
+    .hide-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar Sesión - Clientes{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card card-dark p-4 shadow-lg border-0">
+            <div class="text-center mb-4">
+                <span class="material-symbols-outlined text-primary" style="font-size: 3rem;">restaurant</span>
+                <h3 class="fw-bold mt-2 text-white">Portal de Clientes</h3>
+                <p class="text-muted">Inicia sesión para gestionar tus reservas.</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} p-3 rounded-xl mb-4 text-sm">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="d-flex flex-column gap-3">
+                {% csrf_token %}
+                <div>
+                    <label class="form-label text-white fw-semibold small">Usuario o Correo</label>
+                    <input type="text" name="username" class="form-control rounded-xl p-3"
+                        placeholder="Ingresa tu usuario" required>
+                </div>
+                <div>
+                    <label class="form-label text-white fw-semibold small">Contraseña</label>
+                    <input type="password" name="password" class="form-control rounded-xl p-3"
+                        placeholder="Ingresa tu contraseña" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-xl p-3 fw-bold mt-2"
+                    style="background-color: var(--primary); border: none;">Ingresar</button>
+                <div class="text-center mt-3">
+                    <span class="text-muted small">¿No tienes cuenta?</span>
+                    <a href="{% url 'clientes:registro' %}"
+                        class="text-primary fw-bold text-decoration-none small">Regístrate aquí</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

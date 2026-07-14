@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Configuración de Reservas - RestaurantOS{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'lista_reservas' %}"
+        class="btn btn-outline-light rounded-circle p-2 d-flex align-items-center justify-content-center border-0"
+        style="width:40px; height:40px;">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h2 class="h4 font-bold text-white mb-0">Configuración (Administrador)</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="glass-card card-dark p-4">
+            <h5 class="text-primary font-bold mb-3">Horario General</h5>
+            <p class="text-muted small">Al aplicar un horario de reservas, el sistema validará automáticamente que no se
+                puedan agendar turnos fuera del rango.</p>
+            {% if config %}
+            <div class="rounded-lg p-3 bg-white/5 border border-white/10 mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Hora de Inicio:</span>
+                    <strong class="text-white">{{ config.hora_apertura|time:"H:i" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Hora de Cierre:</span>
+                    <strong class="text-white">{{ config.hora_cierre|time:"H:i" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Mínimo entre Reservas:</span>
+                    <strong class="text-white">{{ config.intervalo_minutos }} min</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Capacidad simultánea:</span>
+                    <strong class="text-white">{{ config.capacidad_maxima_personas }} pax</strong>
+                </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm w-100 rounded-pill">Editar Horario (Pronto)</button>
+            {% else %}
+            <div class="alert alert-warning py-2 mb-0 border-0"
+                style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
+                No has configurado un horario de reservas en el administrador de Django.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="glass-card card-dark p-4">
+            <h5 class="text-danger font-bold mb-3">Días No Laborables</h5>
+            <p class="text-muted small">Manejo de feriados, cierres forzados por reparación u otros. No se admitirán
+                reservas estos días.</p>
+
+            <div class="list-group list-group-flush bg-transparent">
+                {% for dia in dias_bloqueados %}
+                <div
+                    class="list-group-item bg-transparent border-white/5 text-white py-3 px-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="font-bold">{{ dia.fecha|date:"l d de F, Y" }}</div>
+                        <div class="text-muted small">{{ dia.motivo }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted text-center py-4 bg-white/5 rounded-lg">
+                    No hay días bloqueados configurados.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

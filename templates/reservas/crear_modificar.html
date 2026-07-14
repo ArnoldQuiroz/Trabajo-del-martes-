@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} - RestaurantOS{% endblock %}
+{% block nav_reservas %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% url 'lista_reservas' %}"
+                class="btn btn-outline-light rounded-circle p-2 d-flex align-items-center justify-content-center border-0"
+                style="width:40px; height:40px;">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <h2 class="h4 font-bold text-white mb-0">{{ titulo }}</h2>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger glass-card border-0 text-white mb-4"
+            style="background: rgba(220, 53, 69, 0.2) !important;">
+            <div class="font-bold mb-2"><span class="material-symbols-outlined align-middle me-2">error</span> Revisa
+                los errores del formulario:</div>
+            <ul class="mb-0">
+                {% for field in form %}
+                {% for error in field.errors %}
+                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="glass-card card-dark p-4 p-md-5">
+            <form method="POST">
+                {% csrf_token %}
+
+                <h5 class="text-primary font-bold mb-3"
+                    style="font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;">Datos del Cliente</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="form-label text-muted small font-bold">Nombre Completo *</label>
+                        {{ form.cliente_nombre }}
+                        <script>document.getElementById('id_cliente_nombre').className = 'form-control rounded-lg';</script>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small font-bold">Teléfono *</label>
+                        {{ form.cliente_telefono }}
+                        <script>document.getElementById('id_cliente_telefono').className = 'form-control rounded-lg';</script>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small font-bold">Correo Electrónico</label>
+                        {{ form.cliente_email }}
+                        <script>document.getElementById('id_cliente_email').className = 'form-control rounded-lg';</script>
+                    </div>
+                </div>
+
+                <div class="my-4 border-top border-white/10"></div>
+
+                <h5 class="text-primary font-bold mb-3"
+                    style="font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;">Datos de la Reserva</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small font-bold">Fecha *</label>
+                        {{ form.fecha }}
+                        <script>document.getElementById('id_fecha').className = 'form-control rounded-lg';</script>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small font-bold">Hora *</label>
+                        {{ form.hora }}
+                        <script>document.getElementById('id_hora').className = 'form-control rounded-lg';</script>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small font-bold">Mesa (Opcional)</label>
+                        {{ form.mesa }}
+                        <script>document.getElementById('id_mesa').className = 'form-select rounded-lg reserva-mesa-input';</script>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small font-bold">N° Personas *</label>
+                        {{ form.cantidad_personas }}
+                        <script>document.getElementById('id_cantidad_personas').className = 'form-control rounded-lg';</script>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted small font-bold">Observaciones / Pedidos especiales</label>
+                        {{ form.observaciones }}
+                        <script>document.getElementById('id_observaciones').className = 'form-control rounded-lg'; document.getElementById('id_observaciones').rows = 2;</script>
+                    </div>
+                </div>
+
+                {% include 'reservas/_selector_platos.html' %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" name="accion" value="confirmar_pedido"
+                        class="btn btn-primary btn-lg rounded-pill font-bold py-3"
+                        style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
+                        Confirmar Pedido y Pagar
+                    </button>
+                    <button type="submit" name="accion" value="guardar_pendiente"
+                        class="btn btn-outline-light rounded-pill py-2">
+                        Guardar pendiente (confirmar después)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% include 'reservas/_mesa_disponible_script.html' %}
+{% endblock %}

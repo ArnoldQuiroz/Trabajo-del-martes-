@@ -1,0 +1,234 @@
+{% extends "web/base_publica.html" %}
+
+{% block title %}TICUY - Restaurante Campestre{% endblock %}
+{% block nav_class %}index-nav fixed left-0 right-0 top-0 z-50{% endblock %}
+
+{% block content %}
+<style>
+    .index-nav {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0));
+        border-bottom: 0;
+    }
+
+    .index-nav a,
+    .index-nav button {
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .index-nav .btn-primary {
+        letter-spacing: 0.06em;
+    }
+
+    .ticuy-wordmark {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        letter-spacing: 0.24em;
+    }
+
+    .editorial-copy {
+        font-family: "Plus Jakarta Sans", sans-serif;
+    }
+</style>
+
+<!-- Cinematic Hero -->
+<section class="relative min-h-screen overflow-hidden bg-black text-white">
+    <div class="absolute inset-0 grid grid-cols-1 md:grid-cols-2">
+        <div class="relative min-h-[50vh] md:min-h-screen">
+            <img src="https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&q=90&w=1400"
+                alt="Ingredientes frescos de la cocina TICUY" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(77,10,5,0.52),rgba(0,0,0,0.16))]"></div>
+        </div>
+        <div class="relative min-h-[50vh] md:min-h-screen">
+            <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=90&w=1400"
+                alt="Producto fresco presentado sobre fondo oscuro" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.22),rgba(0,0,0,0.72))]"></div>
+        </div>
+    </div>
+
+    <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.04)_36%,rgba(0,0,0,0.72)_100%)]"></div>
+
+    <div class="relative z-10 flex min-h-screen flex-col justify-between px-5 pb-8 pt-28 sm:px-8 lg:px-10">
+        <div class="max-w-[820px]">
+            <p class="mb-5 text-xs font-black uppercase tracking-[0.34em] text-white/75">Restaurante campestre</p>
+            <h1 class="ticuy-wordmark text-5xl font-black leading-none sm:text-7xl md:text-8xl">TICUY</h1>
+            <p class="editorial-copy mt-7 max-w-xl text-2xl font-semibold leading-tight text-white/90 sm:text-4xl">
+                Sabor de campo, mesa peruana y momentos para compartir.
+            </p>
+        </div>
+
+        <div class="grid gap-7 text-xs font-bold uppercase tracking-[0.22em] text-white/85 md:grid-cols-3 md:items-end">
+            <p>Carretera Central km 40, Campiña Verde - Perú</p>
+            <div class="flex flex-wrap gap-3 md:justify-center">
+                <a href="{% url 'clientes:nueva_reserva' %}"
+                    class="pointer-events-auto border border-white/75 px-5 py-3 text-white transition hover:bg-white hover:text-black">
+                    Reservas
+                </a>
+                <a href="{% url 'clientes:menu' %}"
+                    class="pointer-events-auto border border-white/25 px-5 py-3 text-white transition hover:border-white">
+                    Carta
+                </a>
+            </div>
+            <p class="md:text-right">@TICUYREST</p>
+        </div>
+    </div>
+</section>
+
+<!-- Editorial Intro -->
+<section class="bg-[#f4eee3] text-[#17120e]">
+    <div class="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-28">
+        <div>
+            <p class="text-xs font-black uppercase tracking-[0.28em] text-[#8a1f14]">Nuestra historia</p>
+            <h2 class="editorial-copy mt-5 text-4xl font-black leading-tight sm:text-6xl">
+                Un lugar para llegar con hambre y quedarse por la experiencia.
+            </h2>
+        </div>
+        <div class="space-y-7 text-lg leading-9 text-[#3d342d]">
+            <p>
+                TICUY nace como una propuesta campestre para reunir a familias, amigos y visitantes alrededor de una
+                comida honesta, abundante y preparada con identidad local.
+            </p>
+            <p>
+                Cada visita está pensada para sentirse simple: reservas ordenadas, atención clara, platos al centro y un
+                ambiente cálido que invite a volver.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Image Story -->
+<section class="bg-black text-white">
+    <div class="grid min-h-screen lg:grid-cols-2">
+        <div class="relative min-h-[520px]">
+            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=90&w=1500"
+                alt="Mesa familiar servida con platos campestres" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-black/20"></div>
+        </div>
+        <div class="flex items-center px-5 py-20 sm:px-8 lg:px-16">
+            <div class="max-w-xl">
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-[#f0c15a]">Experiencia</p>
+                <h2 class="editorial-copy mt-5 text-4xl font-black leading-tight sm:text-6xl">
+                    Cocina tradicional con atención moderna.
+                </h2>
+                <p class="mt-8 text-lg leading-9 text-white/70">
+                    El cliente puede revisar la carta, reservar mesa y vivir una atención más ordenada desde que llega.
+                    La tecnología trabaja detrás; la experiencia se siente humana.
+                </p>
+                <div class="mt-10 grid gap-5 sm:grid-cols-3">
+                    <div class="border-t border-white/25 pt-4">
+                        <p class="text-3xl font-black">18</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.16em] text-white/55">mesas</p>
+                    </div>
+                    <div class="border-t border-white/25 pt-4">
+                        <p class="text-3xl font-black">11 AM</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.16em] text-white/55">apertura</p>
+                    </div>
+                    <div class="border-t border-white/25 pt-4">
+                        <p class="text-3xl font-black">100%</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.16em] text-white/55">campestre</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Menu Gallery -->
+<section class="bg-[#101010] px-5 py-20 text-white sm:px-8 lg:px-10 lg:py-28">
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-[#f0c15a]">Carta destacada</p>
+                <h2 class="editorial-copy mt-4 text-4xl font-black leading-tight sm:text-6xl">Imágenes que abren el apetito.</h2>
+            </div>
+            <a href="{% url 'clientes:menu' %}"
+                class="inline-flex w-fit border border-white/35 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-black">
+                Ver carta completa
+            </a>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-3">
+            <article class="group">
+                <div class="overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&q=90&w=900"
+                        alt="Plato principal de la carta TICUY" class="aspect-[3/4] w-full object-cover transition duration-700 group-hover:scale-105">
+                </div>
+                <p class="mt-5 text-xs font-black uppercase tracking-[0.22em] text-white/45">Fondos</p>
+                <h3 class="mt-2 text-2xl font-black">Lomo saltado</h3>
+            </article>
+
+            <article class="group md:pt-16">
+                <div class="overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&q=90&w=900"
+                        alt="Entrada fresca de TICUY" class="aspect-[3/4] w-full object-cover transition duration-700 group-hover:scale-105">
+                </div>
+                <p class="mt-5 text-xs font-black uppercase tracking-[0.22em] text-white/45">Entradas</p>
+                <h3 class="mt-2 text-2xl font-black">Ceviche fresco</h3>
+            </article>
+
+            <article class="group">
+                <div class="overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=90&w=900"
+                        alt="Bebida servida para acompañar la comida" class="aspect-[3/4] w-full object-cover transition duration-700 group-hover:scale-105">
+                </div>
+                <p class="mt-5 text-xs font-black uppercase tracking-[0.22em] text-white/45">Bebidas</p>
+                <h3 class="mt-2 text-2xl font-black">Pisco sour</h3>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Band -->
+<section class="bg-[#f4eee3] text-[#17120e]">
+    <div class="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-3 lg:px-10">
+        <article>
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-[#8a1f14]">Misión</p>
+            <p class="mt-4 text-lg leading-8 text-[#3d342d]">
+                Brindar una experiencia gastronómica de calidad con platos tradicionales, ambiente familiar y atención
+                eficiente.
+            </p>
+        </article>
+        <article>
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-[#8a1f14]">Visión</p>
+            <p class="mt-4 text-lg leading-8 text-[#3d342d]">
+                Ser reconocidos por la calidad de nuestros platos, el servicio y la tecnología que mejora cada visita.
+            </p>
+        </article>
+        <article>
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-[#8a1f14]">Objetivo</p>
+            <p class="mt-4 text-lg leading-8 text-[#3d342d]">
+                Ordenar reservas, mesas y atención para que cada cliente disfrute una visita más rápida y cómoda.
+            </p>
+        </article>
+    </div>
+</section>
+
+<!-- Reservation CTA -->
+<section class="relative min-h-[82vh] overflow-hidden bg-black text-white">
+    <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&q=90&w=1800"
+        alt="Interior elegante de restaurante para reservar" class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.82),rgba(0,0,0,0.28),rgba(0,0,0,0.68))]"></div>
+
+    <div class="relative z-10 mx-auto flex min-h-[82vh] max-w-7xl items-end px-5 py-16 sm:px-8 lg:px-10">
+        <div class="max-w-3xl">
+            <p class="text-xs font-black uppercase tracking-[0.28em] text-[#f0c15a]">Reservas</p>
+            <h2 class="editorial-copy mt-5 text-5xl font-black leading-tight sm:text-7xl">
+                Tu mesa te espera.
+            </h2>
+            <p class="mt-7 max-w-xl text-lg leading-8 text-white/75">
+                Elige la fecha, confirma tu grupo y llega directo a disfrutar. TICUY se encarga de ordenar la atención.
+            </p>
+            <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+                <a href="{% url 'clientes:nueva_reserva' %}"
+                    class="border border-white bg-white px-7 py-4 text-xs font-black uppercase tracking-[0.18em] text-black transition hover:bg-transparent hover:text-white">
+                    Reservar ahora
+                </a>
+                <a href="{% url 'clientes:menu' %}"
+                    class="border border-white/35 px-7 py-4 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-white">
+                    Ver carta
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

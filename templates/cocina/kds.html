@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Cocina — KDS | RestaurantOS{% endblock %}
+{% block nav_cocina %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cocina/kds.css' %}">
+<style>
+  #main-wrapper .kds-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 0px);
+    padding: 0 !important;
+    margin: 0;
+    max-width: 100%;
+    background: #f0f2f5;
+  }
+  #main-wrapper .kds-inner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    color: #fff;
+  }
+  #main-wrapper .kds-main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    background: #f0f2f5;
+  }
+  #main-wrapper .kds-grid {
+    flex: 1;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    align-content: start;
+  }
+  #main-wrapper .kds-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    padding: 20px;
+    background: #fff;
+    border-left: 1px solid #e0e0e0;
+  }
+</style>
+{% endblock %}
+
+{% block main_class %}kds-layout{% endblock %}
+
+{% block content %}
+<!-- ========= KDS HEADER INTERNO ========= -->
+<div class="kds-inner-header" id="kds-header">
+    <div class="kds-header__left">
+        <span class="material-symbols-outlined text-primary text-2xl">oven_gen</span>
+        <h1 class="kds-header__title">Panel de Comandas</h1>
+        <span class="kds-ws-indicator kds-ws-indicator--off" id="ws-indicator" title="WebSocket desconectado">●</span>
+    </div>
+    <div class="kds-header__right">
+        <label for="filtro-zona" class="kds-header__filter-label">Piso:</label>
+        <select id="filtro-zona" class="kds-header__select">
+            <option value="">Todas</option>
+            {% for zona in zonas %}
+            <option value="{{ zona.id }}">{{ zona.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<!-- ========= MAIN CONTENT ========= -->
+<div class="kds-main" id="kds-main">
+    <!-- Grid de tarjetas de comandas -->
+    <section class="kds-grid" id="kds-grid">
+        <div class="kds-loading" id="kds-loading">
+            <div class="kds-loading__spinner"></div>
+            <p>Cargando comandas...</p>
+        </div>
+    </section>
+
+    <!-- Panel lateral de resumen -->
+    <aside class="kds-sidebar" id="kds-sidebar">
+        <div class="kds-summary">
+            <h2 class="kds-summary__title">Resumen</h2>
+            <div class="kds-summary__item">
+                <span class="kds-summary__label">Total pedidos:</span>
+                <span class="kds-summary__value" id="total-pedidos">0</span>
+            </div>
+            <div class="kds-summary__item">
+                <span class="kds-summary__label">Pedidos urgentes:</span>
+                <span class="kds-summary__value kds-summary__value--urgent" id="pedidos-urgentes">0</span>
+            </div>
+            <div class="kds-summary__item" style="margin-top: 8px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 12px;">
+                <span class="kds-summary__label" style="font-size: 0.8rem;">Recién llegados:</span>
+                <span class="kds-summary__value" style="font-size: 1rem; color: var(--kds-warning);" id="pedidos-recien-llegados">0</span>
+            </div>
+        </div>
+
+        <!-- Indicador de paginación -->
+        <div class="kds-pagination" id="kds-pagination" style="display:none;">
+            <h3 class="kds-pagination__title">Páginas</h3>
+            <p class="kds-pagination__info">
+                Página <span id="pagina-actual">1</span> de <span id="total-paginas">1</span>
+            </p>
+            <div class="kds-pagination__dots" id="pagination-dots"></div>
+            <label class="kds-pagination__auto">
+                <input type="checkbox" id="auto-rotate" checked>
+                Rotación automática
+            </label>
+        </div>
+
+        <!-- Reloj -->
+        <div class="kds-clock" id="kds-clock">
+            <span class="kds-clock__time" id="clock-time">--:--:--</span>
+            <span class="kds-clock__date" id="clock-date">--</span>
+        </div>
+    </aside>
+</div>
+
+<!-- ========= TOAST NOTIFICATION ========= -->
+<div class="kds-toast" id="kds-toast"></div>
+
+<!-- ========= MODAL DE ANULACIÓN ========= -->
+<div class="kds-modal-overlay" id="modal-anulacion" style="display:none;">
+    <div class="kds-modal">
+        <div class="kds-modal__header">
+            <h3 class="kds-modal__title">⚠️ Anular Plato</h3>
+            <button class="kds-modal__close" onclick="KDS.cerrarModalAnulacion()">&times;</button>
+        </div>
+        <div class="kds-modal__body">
+            <p class="kds-modal__plato" id="modal-plato-nombre"></p>
+
+            <!-- Cantidad parcial -->
+            <div class="kds-modal__parcial" id="modal-parcial-wrapper" style="display:none;">
+                <label class="kds-modal__label" for="modal-cantidad-parcial">
+                    ¿Cuántas unidades deseas cancelar/cocinar?
+                </label>
+                <select id="modal-cantidad-parcial" class="kds-modal__select">
+                    <option value="0">Cancelar todo — No cocinar ninguno</option>
+                </select>
+                <p class="kds-modal__parcial-info">
+                    Se cancelarán todas las unidades. No se cocinará ninguna.
+                </p>
+            </div>
+
+            <label class="kds-modal__label" for="modal-motivo">
+                Motivo de anulación <span class="kds-modal__required">*obligatorio</span>
+            </label>
+            <textarea
+                id="modal-motivo"
+                class="kds-modal__textarea"
+                placeholder="Escribe el motivo de la anulación (ej: ingrediente agotado, error de pedido...)"
+                rows="3"
+                maxlength="200"
+            ></textarea>
+            <span class="kds-modal__counter"><span id="modal-chars">0</span>/200</span>
+            <p class="kds-modal__error" id="modal-error" style="display:none;">
+                Debes ingresar un motivo para anular este plato.
+            </p>
+        </div>
+        <div class="kds-modal__footer">
+            <button class="kds-modal__btn kds-modal__btn--cancel" onclick="KDS.cerrarModalAnulacion()">
+                Volver
+            </button>
+            <button class="kds-modal__btn kds-modal__btn--confirm" id="modal-confirmar" onclick="KDS.confirmarAnulacion()">
+                Confirmar Anulación
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuración global del KDS
+    const KDS_CONFIG = {
+        apiBaseUrl: '/api/cocina',
+        wsUrl: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/cocina/kds/`,
+        pollInterval: 10000,       // 10s — respaldo si WS falla o no emite eventos
+        rotateInterval: 15000,     // 15 segundos entre páginas
+        itemsPerPage: 6,           // tarjetas por página
+        csrfToken: '{{ csrf_token }}',
+    };
+</script>
+<script src="{% static 'cocina/kds.js' %}"></script>
+{% endblock %}

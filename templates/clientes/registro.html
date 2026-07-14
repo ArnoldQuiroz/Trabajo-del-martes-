@@ -1,0 +1,63 @@
+{% extends 'web/base_publica.html' %}
+{% block title %}Registro de Cliente{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-7 col-lg-6">
+        <div class="card card-dark p-4 shadow-lg border-0">
+            <div class="text-center mb-4">
+                <span class="material-symbols-outlined text-secondary" style="font-size: 3rem;">person_add</span>
+                <h3 class="fw-bold mt-2 text-white">Registro de Cliente</h3>
+                <p class="text-muted">Crea tu cuenta para empezar a reservar.</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} p-3 rounded-xl mb-4 text-sm">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">Usuario</label>
+                    <input type="text" name="username" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">Correo Electrónico</label>
+                    <input type="email" name="email" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">Nombres</label>
+                    <input type="text" name="nombres" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">Apellidos</label>
+                    <input type="text" name="apellidos" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">DNI / Documento</label>
+                    <input type="text" name="dni" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white fw-semibold small">Teléfono</label>
+                    <input type="text" name="telefono" class="form-control rounded-xl p-3" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label text-white fw-semibold small">Contraseña</label>
+                    <input type="password" name="password" class="form-control rounded-xl p-3" required>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn w-100 rounded-xl p-3 fw-bold text-dark"
+                        style="background-color: var(--secondary); border: none;">Registrarse</button>
+                    <div class="text-center mt-3">
+                        <span class="text-muted small">¿Ya tienes cuenta?</span>
+                        <a href="{% url 'login' %}" class="text-secondary fw-bold text-decoration-none small">Inicia
+                            Sesión</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
