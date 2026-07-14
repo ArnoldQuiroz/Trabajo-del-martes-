@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from django.contrib import messages
+from django.utils import timezone
 
 from apps.usuarios.models import Usuario, Rol
 
@@ -182,9 +183,27 @@ def mis_reservas(request):
 
     )
 
+    hoy = timezone.localdate()
+    proximas_reservas = (
+        reservas
+        .filter(fecha__gte=hoy)
+        .exclude(estado__in=['CANCELADA', 'FINALIZADA', 'NO_ASISTIO'])
+        .order_by('fecha', 'hora')
+    )
+    resumen = {
+        'total': reservas.count(),
+        'pendientes': reservas.filter(estado='PENDIENTE').count(),
+        'confirmadas': reservas.filter(estado='CONFIRMADA').count(),
+        'proxima': proximas_reservas.first(),
+    }
+
     
 
-    return render(request, 'clientes/mis_reservas.html', {'reservas': reservas, 'cliente': cliente})
+    return render(request, 'clientes/mis_reservas.html', {
+        'reservas': reservas,
+        'cliente': cliente,
+        'resumen': resumen,
+    })
 
 
 
@@ -241,6 +260,11 @@ def nueva_reserva(request):
 # ─── Vistas Públicas (Web TICUY) ───
 
 def home_publica(request):
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'perfil_cliente'):
+            return redirect('clientes:mis_reservas')
+        if hasattr(request.user, 'rol') and request.user.rol:
+            return redirect('dashboard')
     return render(request, 'web/index.html')
 
 def menu_publico(request):

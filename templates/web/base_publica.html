@@ -130,22 +130,23 @@
                         class="text-sm font-semibold text-on-surface-variant hover:text-white transition">Reservar
                         Mesa</a>
 
-                    <div class="w-px h-6 bg-white/10 mx-2"></div>
+                    <div x-show="itemCount > 0" x-cloak class="w-px h-6 bg-white/10 mx-2"></div>
 
                     <a href="{% url 'clientes:carrito' %}"
+                        x-show="itemCount > 0" x-cloak
                         class="relative text-on-surface-variant hover:text-white transition flex items-center">
                         <span class="material-symbols-outlined">shopping_cart</span>
-                        <span x-show="itemCount > 0" x-text="itemCount" x-cloak
+                        <span x-text="itemCount"
                             class="absolute -top-2 -right-2 bg-secondary text-background text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"></span>
                     </a>
 
                     {% if user.is_authenticated and user.rol.nombre == 'CLIENTE' %}
                     <a href="{% url 'clientes:mis_reservas' %}"
                         class="text-sm font-semibold text-on-surface hover:text-primary transition flex items-center gap-1">
-                        <span class="material-symbols-outlined text-base">person</span> {{
-                        user.perfil_cliente.nombres|default:user.username }}
+                        <span class="material-symbols-outlined text-base">person</span>
+                        <span>{% if user.perfil_cliente %}{{ user.perfil_cliente.nombres|default:user.username }}{% else %}{{ user.username }}{% endif %}</span>
                     </a>
-                    <form action="{% url 'logout' %}" method="post" class="inline">
+                    <form action="{% url 'logout' %}" method="post" class="inline" @submit="clearCartForLogout()">
                         {% csrf_token %}
                         <button type="submit" class="text-sm font-bold text-red-400 hover:text-red-300">Salir</button>
                     </form>
@@ -200,6 +201,21 @@
                 get cartTotal() {
                     return this.items.reduce((sum, item) => sum + (parseFloat(item.precio) * item.cantidad), 0).toFixed(2);
                 },
+                formatMoney(value) {
+                    return (parseFloat(value) || 0).toFixed(2);
+                },
+                lineTotal(item) {
+                    return ((parseFloat(item.precio) || 0) * (parseInt(item.cantidad) || 0)).toFixed(2);
+                },
+                cartImage(item) {
+                    if (item.imagen) return item.imagen;
+                    const name = (item.nombre || '').toLowerCase();
+                    if (name.includes('ceviche')) return 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&q=85&w=900';
+                    if (name.includes('lomo')) return 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=85&w=900';
+                    if (name.includes('pisco')) return 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=85&w=900';
+                    if (name.includes('kola') || name.includes('bebida')) return 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&q=85&w=900';
+                    return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=85&w=900';
+                },
                 addToCart(plato) {
                     const exists = this.items.find(i => i.id === plato.id);
                     if (exists) {
@@ -223,6 +239,13 @@
                 },
                 removeItem(id) {
                     this.items = this.items.filter(i => i.id !== id);
+                },
+                clearCart() {
+                    this.items = [];
+                },
+                clearCartForLogout() {
+                    this.items = [];
+                    localStorage.removeItem('ticuy_cart');
                 }
             }
         }

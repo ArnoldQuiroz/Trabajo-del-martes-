@@ -1,109 +1,196 @@
 {% extends 'web/base_publica.html' %}
-{% block title %}Mis Reservas - Clientes{% endblock %}
+
+{% block title %}Portal del Cliente - TICUY{% endblock %}
+
+{% block nav_class %}bg-[#0b0d12]/95 border-b border-white/10 sticky top-0 z-50 backdrop-blur-xl{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold mb-1 text-white">Mis Reservas</h4>
-        <p class="text-muted small mb-0">Gestiona tus próximas visitas al restaurante, {{ cliente.nombres }}.</p>
-    </div>
-    <a href="{% url 'clientes:nueva_reserva' %}"
-        class="btn btn-primary d-flex align-items-center gap-2 fw-semibold px-4 rounded-3 border-0"
-        style="background-color: rgb(var(--secondary)); color: #000;">
-        <span class="material-symbols-outlined">add</span>
-        Nueva Reserva
-    </a>
-</div>
+<div class="min-h-screen bg-[#090a0d] text-white">
+    <section class="relative isolate overflow-hidden border-b border-white/10">
+        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=90&w=1800"
+            alt="Mesa preparada para clientes TICUY" class="absolute inset-0 -z-20 h-full w-full object-cover">
+        <div class="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgba(6,7,10,0.96)_0%,rgba(6,7,10,0.72)_46%,rgba(6,7,10,0.92)_100%)]"></div>
 
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} p-3 rounded-xl mb-4 text-sm">{{ message }}</div>
-{% endfor %}
-{% endif %}
+        <div class="mx-auto grid min-h-[520px] max-w-7xl gap-10 px-4 pb-14 pt-20 sm:px-6 lg:grid-cols-[1fr_390px] lg:px-8">
+            <div class="flex flex-col justify-end">
+                <div class="mb-8 inline-flex w-fit items-center gap-3 border border-secondary/25 bg-secondary/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.26em] text-secondary">
+                    <span class="material-symbols-outlined text-base">verified_user</span>
+                    Portal de cliente
+                </div>
 
-<div class="card card-dark border-0 shadow-sm overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-dark table-hover mb-0">
-            <thead style="background: rgb(var(--surface));">
-                <tr>
-                    <th class="py-3 px-4 text-muted font-weight-bold"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Reserva</th>
-                    <th class="py-3 px-4 text-muted font-weight-bold"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Fecha y Hora</th>
-                    <th class="py-3 px-4 text-muted font-weight-bold"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Mesa / Personas</th>
-                    <th class="py-3 px-4 text-muted font-weight-bold"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Platos</th>
-                    <th class="py-3 px-4 text-muted font-weight-bold text-center"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Estado</th>
-                    <th class="py-3 px-4 text-muted font-weight-bold text-end"
-                        style="font-size: 0.8rem; text-transform: uppercase;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in reservas %}
-                <tr>
-                    <td class="py-3 px-4 align-middle">
-                        <span class="fw-bold text-white">#RES-{{ r.id|stringformat:"04d" }}</span>
-                    </td>
-                    <td class="py-3 px-4 align-middle">
-                        <div class="fw-semibold text-white">{{ r.fecha|date:"d M Y" }}</div>
-                        <div class="text-muted small">{{ r.hora|time:"H:i" }}</div>
-                    </td>
-                    <td class="py-3 px-4 align-middle">
-                        <div class="fw-semibold text-white">
-                            {% if r.mesa %}{{ r.mesa }} (Zona: {{ r.mesa.zona.nombre }}){% else %}Mesa sin asignar{%
-                            endif %}
+                <p class="text-sm font-semibold text-white/62">Bienvenido de nuevo</p>
+                <h1 class="mt-3 max-w-4xl font-['Plus_Jakarta_Sans'] text-5xl font-black leading-[0.95] sm:text-7xl lg:text-8xl">
+                    {{ cliente.nombres }}
+                </h1>
+                <p class="mt-7 max-w-2xl text-lg leading-8 text-white/72">
+                    Gestiona tus reservas, revisa tu próxima visita y arma tu pedido antes de llegar al restaurante.
+                </p>
+
+                <div class="mt-9 flex flex-wrap gap-3">
+                    <a href="{% url 'clientes:nueva_reserva' %}"
+                        class="btn-primary inline-flex min-h-12 items-center justify-center gap-2 px-6 text-xs font-black uppercase tracking-[0.16em]">
+                        Reservar mesa
+                        <span class="material-symbols-outlined text-base">event_available</span>
+                    </a>
+                    <a href="{% url 'clientes:menu' %}"
+                        class="inline-flex min-h-12 items-center justify-center gap-2 border border-white/18 bg-white/[0.05] px-6 text-xs font-black uppercase tracking-[0.16em] text-white transition hover:border-white/35 hover:bg-white/[0.09]">
+                        Ver carta
+                        <span class="material-symbols-outlined text-base">restaurant_menu</span>
+                    </a>
+                </div>
+            </div>
+
+            <aside class="self-end border border-white/12 bg-black/45 p-6 backdrop-blur-xl">
+                <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Próxima visita</p>
+                {% if resumen.proxima %}
+                <div class="mt-6">
+                    <p class="text-4xl font-black text-white">{{ resumen.proxima.fecha|date:"d M" }}</p>
+                    <p class="mt-2 text-sm font-semibold text-white/64">{{ resumen.proxima.hora|time:"H:i" }} · {{ resumen.proxima.cantidad_personas }} personas</p>
+                    <p class="mt-5 border-t border-white/10 pt-5 text-sm text-white/62">
+                        {% if resumen.proxima.mesa %}Mesa {{ resumen.proxima.mesa.numero }}{% else %}Mesa por asignar{% endif %}
+                    </p>
+                    <div class="mt-5 inline-flex border border-secondary/30 bg-secondary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-secondary">
+                        {{ resumen.proxima.get_estado_display }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="mt-6">
+                    <div class="flex h-14 w-14 items-center justify-center border border-white/12 bg-white/[0.04]">
+                        <span class="material-symbols-outlined text-3xl text-white/42">event_busy</span>
+                    </div>
+                    <p class="mt-5 text-2xl font-black text-white">Sin visita agendada</p>
+                    <p class="mt-3 text-sm leading-6 text-white/58">Reserva una mesa y el equipo TICUY preparará tu llegada.</p>
+                </div>
+                {% endif %}
+            </aside>
+        </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {% if messages %}
+        <div class="mb-8 space-y-3">
+            {% for message in messages %}
+            <div class="border p-4 text-sm {% if message.tags == 'error' %}border-red-400/35 bg-red-500/12 text-red-100{% elif message.tags == 'success' %}border-secondary/35 bg-secondary/10 text-secondary{% else %}border-white/15 bg-white/[0.04] text-white/75{% endif %}">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-base">{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid gap-4 md:grid-cols-4">
+            <div class="border border-white/10 bg-[#11131b] p-5">
+                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-white/42">Reservas</p>
+                <p class="mt-3 text-4xl font-black text-white">{{ resumen.total }}</p>
+            </div>
+            <div class="border border-white/10 bg-[#11131b] p-5">
+                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-white/42">Pendientes</p>
+                <p class="mt-3 text-4xl font-black text-[#f0c15a]">{{ resumen.pendientes }}</p>
+            </div>
+            <div class="border border-white/10 bg-[#11131b] p-5">
+                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-white/42">Confirmadas</p>
+                <p class="mt-3 text-4xl font-black text-secondary">{{ resumen.confirmadas }}</p>
+            </div>
+            <div class="border border-white/10 bg-[#11131b] p-5">
+                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-white/42">Cliente</p>
+                <p class="mt-3 truncate text-lg font-black text-white">{{ cliente.email|default:cliente.telefono }}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+        <div class="mb-7 flex flex-wrap items-end justify-between gap-5 border-b border-white/10 pb-5">
+            <div>
+                <p class="text-[11px] font-black uppercase tracking-[0.24em] text-[#f0c15a]">Historial personal</p>
+                <h2 class="mt-2 text-3xl font-black text-white">Mis reservas</h2>
+            </div>
+            <a href="{% url 'clientes:nueva_reserva' %}"
+                class="inline-flex min-h-11 items-center justify-center gap-2 border border-white/15 bg-white/[0.04] px-5 text-xs font-black uppercase tracking-[0.14em] text-white transition hover:border-white/30 hover:bg-white/[0.08]">
+                Agendar visita
+                <span class="material-symbols-outlined text-base">add</span>
+            </a>
+        </div>
+
+        {% if reservas %}
+        <div class="grid gap-4">
+            {% for r in reservas %}
+            <article class="border border-white/10 bg-[#11131b] transition hover:border-white/25">
+                <div class="grid gap-0 lg:grid-cols-[180px_1fr_220px]">
+                    <div class="border-b border-white/10 bg-white/[0.03] p-5 lg:border-b-0 lg:border-r">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Reserva</p>
+                        <p class="mt-2 text-lg font-black text-white">#{{ r.id|stringformat:"04d" }}</p>
+                        <p class="mt-4 text-3xl font-black text-white">{{ r.fecha|date:"d" }}</p>
+                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-white/50">{{ r.fecha|date:"M Y" }}</p>
+                    </div>
+
+                    <div class="p-5">
+                        <div class="flex flex-wrap items-center gap-3">
+                            {% if r.estado == 'PENDIENTE' %}
+                            <span class="border border-[#f0c15a]/30 bg-[#f0c15a]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f0c15a]">Pendiente de pago</span>
+                            {% elif r.estado == 'CONFIRMADA' %}
+                            <span class="border border-secondary/30 bg-secondary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-secondary">Confirmada</span>
+                            {% elif r.estado == 'EN_MESA' %}
+                            <span class="border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-primary">En mesa</span>
+                            {% elif r.estado == 'CANCELADA' %}
+                            <span class="border border-red-400/30 bg-red-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-red-200">Cancelada</span>
+                            {% else %}
+                            <span class="border border-white/15 bg-white/[0.04] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/58">{{ r.get_estado_display }}</span>
+                            {% endif %}
+                            <span class="text-sm font-semibold text-white/55">{{ r.hora|time:"H:i" }} · {{ r.cantidad_personas }} personas</span>
                         </div>
-                        <div class="text-muted small"><span class="material-symbols-outlined align-text-bottom"
-                                style="font-size: 14px;">groups</span> {{ r.cantidad_personas }} personas</div>
-                    </td>
-                    <td class="py-3 px-4 align-middle">
-                        {% for item in r.platos.all %}
-                        <div class="text-muted small">{{ item.cantidad }}x {{ item.plato.nombre }}</div>
-                        {% empty %}
-                        <span class="text-muted small">Sin platos</span>
-                        {% endfor %}
-                    </td>
-                    <td class="py-3 px-4 align-middle text-center">
+
+                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Ubicación</p>
+                                <p class="mt-2 font-black text-white">{% if r.mesa %}Mesa {{ r.mesa.numero }}{% else %}Mesa por asignar{% endif %}</p>
+                                <p class="text-sm text-white/48">{% if r.mesa.zona %}{{ r.mesa.zona.nombre }}{% else %}Te avisaremos al confirmar{% endif %}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Pedido</p>
+                                {% for item in r.platos.all %}
+                                <p class="mt-1 text-sm text-white/62">{{ item.cantidad }}x {{ item.plato.nombre }}</p>
+                                {% empty %}
+                                <p class="mt-2 text-sm text-white/42">Sin platos seleccionados</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center border-t border-white/10 p-5 lg:border-l lg:border-t-0">
                         {% if r.estado == 'PENDIENTE' %}
-                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold">PENDIENTE</span>
-                        {% elif r.estado == 'CONFIRMADA' %}
-                        <span class="badge rounded-pill bg-success px-3 py-2 fw-bold">CONFIRMADA</span>
-                        {% elif r.estado == 'CANCELADA' %}
-                        <span class="badge rounded-pill bg-danger px-3 py-2 fw-bold">CANCELADA</span>
-                        {% elif r.estado == 'NO_ASISTIO' %}
-                        <span class="badge rounded-pill bg-secondary px-3 py-2 fw-bold">NO ASISTIÓ</span>
-                        {% elif r.estado == 'EN_MESA' %}
-                        <span class="badge rounded-pill px-3 py-2 fw-bold"
-                            style="background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff;">EN MESA</span>
-                        {% else %}
-                        <span class="badge rounded-pill bg-secondary px-3 py-2 fw-bold">{{ r.get_estado_display
-                            }}</span>
-                        {% endif %}
-                    </td>
-                    <td class="py-3 px-4 align-middle text-end">
-                        {% if r.estado == 'PENDIENTE' %}
-                        <a href="{% url 'pago_reserva' r.id %}" class="btn btn-sm btn-primary rounded-pill px-3"
-                            style="background-color:rgb(var(--primary)); color:rgb(var(--bg)); border:none;">
-                            Pagar y confirmar
+                        <a href="{% url 'pago_reserva' r.id %}"
+                            class="btn-primary inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 text-xs font-black uppercase tracking-[0.14em]">
+                            Pagar
+                            <span class="material-symbols-outlined text-base">payments</span>
                         </a>
                         {% else %}
-                        <span class="text-muted small">—</span>
+                        <span class="inline-flex min-h-11 w-full items-center justify-center border border-white/10 bg-white/[0.035] px-5 text-center text-xs font-black uppercase tracking-[0.14em] text-white/45">
+                            Sin acción pendiente
+                        </span>
                         {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
-                        <span class="material-symbols-outlined d-block mb-2" style="font-size: 3rem;">event_busy</span>
-                        No tienes reservas registradas.<br>
-                        ¡Anímate a reservar una mesa con nosotros!
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="border border-dashed border-white/15 bg-[#11131b] p-8 text-center sm:p-12">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center border border-white/10 bg-white/[0.04]">
+                <span class="material-symbols-outlined text-3xl text-white/45">event_busy</span>
+            </div>
+            <h3 class="mt-6 text-3xl font-black text-white">Aún no tienes reservas.</h3>
+            <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/55">
+                Agenda tu primera visita y prepara tus platos favoritos desde la carta.
+            </p>
+            <a href="{% url 'clientes:nueva_reserva' %}"
+                class="btn-primary mt-7 inline-flex min-h-12 items-center justify-center gap-2 px-7 text-xs font-black uppercase tracking-[0.16em]">
+                Crear reserva
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
+        </div>
+        {% endif %}
+    </section>
 </div>
 {% endblock %}

@@ -1,84 +1,174 @@
 {% extends "web/base_publica.html" %}
 
+{% block title %}Carrito - TICUY{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <div class="mb-10 flex border-b border-white/10 pb-4 gap-4 items-end">
-        <h1 class="text-3xl md:text-4xl font-black text-white">Tu Carrito</h1>
-        <p class="text-on-surface-variant font-medium text-sm mb-1"><span x-text="itemCount"></span> Productos</p>
-    </div>
+<div class="bg-[#0a0b0f] text-white">
+    <section class="relative overflow-hidden border-b border-white/10">
+        <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&q=90&w=1800"
+            alt="Pedido TICUY listo para revisar" class="absolute inset-0 h-full w-full object-cover">
+        <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.93),rgba(0,0,0,0.56),rgba(0,0,0,0.86))]"></div>
 
-    <template x-if="items.length === 0">
-        <div class="text-center py-20 glass-card rounded-3xl border-dashed">
-            <span class="material-symbols-outlined text-border/20 text-6xl mb-4">production_quantity_limits</span>
-            <h2 class="text-2xl font-bold text-white mb-2">El carrito está vacío</h2>
-            <p class="text-on-surface-variant mb-6">Parece que aún no has agregado productos a tu orden.</p>
-            <a href="{% url 'clientes:menu' %}" class="btn-primary px-8 py-3 rounded-full inline-block">Ver Menú</a>
+        <div class="relative z-10 mx-auto flex min-h-[42vh] max-w-7xl items-end px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <p class="text-xs font-black uppercase tracking-[0.34em] text-secondary">Pedido TICUY</p>
+                <h1 class="mt-5 font-['Plus_Jakarta_Sans'] text-5xl font-black leading-tight sm:text-7xl">
+                    Revisa tu carrito.
+                </h1>
+                <p class="mt-6 max-w-2xl text-lg leading-8 text-white/76">
+                    Ajusta cantidades, confirma tu total y continúa con una compra clara.
+                </p>
+            </div>
         </div>
-    </template>
+    </section>
 
-    <template x-if="items.length > 0">
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
+    <section class="mx-auto max-w-7xl px-4 py-12 pb-24 sm:px-6 lg:px-8">
+        <template x-if="items.length === 0">
+            <div class="mx-auto max-w-2xl border border-dashed border-white/15 bg-[#11131b] p-8 text-center sm:p-12">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center border border-white/10 bg-white/[0.04]">
+                    <span class="material-symbols-outlined text-3xl text-white/45">production_quantity_limits</span>
+                </div>
+                <p class="mt-6 text-[11px] font-black uppercase tracking-[0.24em] text-secondary">Carrito vacío</p>
+                <h2 class="mt-3 text-3xl font-black text-white">Todavía no agregaste platos.</h2>
+                <p class="mt-4 text-sm leading-7 text-white/55">
+                    Explora la carta y arma tu pedido para mesa, recojo o delivery.
+                </p>
+                <a href="{% url 'clientes:menu' %}"
+                    class="btn-primary mt-7 inline-flex min-h-12 items-center justify-center gap-2 px-7 text-xs font-black uppercase tracking-[0.16em]">
+                    Ver carta
+                    <span class="material-symbols-outlined text-base">restaurant_menu</span>
+                </a>
+            </div>
+        </template>
 
-            <!-- Lista -->
-            <div class="flex-1 w-full space-y-4">
-                <template x-for="item in items" :key="item.id">
-                    <div class="glass-card p-4 rounded-3xl flex gap-4 items-center">
-                        <div
-                            class="w-20 h-20 bg-surface rounded-2xl overflow-hidden shrink-0 flex items-center justify-center">
-                            <template x-if="item.imagen">
-                                <img :src="item.imagen" :alt="item.nombre" class="w-full h-full object-cover">
-                            </template>
-                            <template x-if="!item.imagen">
-                                <span class="material-symbols-outlined text-border/30">fastfood</span>
-                            </template>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-white font-bold text-sm sm:text-base leading-tight mb-1 truncate"
-                                x-text="item.nombre"></h3>
-                            <p class="text-secondary font-black">S/ <span x-text="item.precio"></span></p>
-                        </div>
-                        <div class="flex items-center gap-3 bg-surface/50 p-1.5 rounded-xl border border-white/5">
-                            <button @click="updateQuantity(item.id, parseInt(item.cantidad) - 1)"
-                                class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
-                            <span class="font-bold text-sm w-4 text-center select-none text-white"
-                                x-text="item.cantidad"></span>
-                            <button @click="updateQuantity(item.id, parseInt(item.cantidad) + 1)"
-                                class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-lg">
-                                <span class="material-symbols-outlined text-sm">add</span>
-                            </button>
-                        </div>
-                        <button @click="removeItem(item.id)"
-                            class="text-on-surface-variant hover:text-red-400 p-2 ml-2 transition">
-                            <span class="material-symbols-outlined text-xl">delete</span>
+        <template x-if="items.length > 0">
+            <div>
+                <div class="mb-8 flex flex-wrap items-end justify-between gap-5 border-b border-white/10 pb-6">
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.24em] text-[#f0c15a]">Tu selección</p>
+                        <h2 class="mt-2 text-3xl font-black text-white sm:text-5xl">
+                            <span x-text="itemCount"></span>
+                            <span x-text="itemCount === 1 ? 'producto' : 'productos'"></span>
+                        </h2>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{% url 'clientes:menu' %}"
+                            class="inline-flex min-h-11 items-center justify-center gap-2 border border-white/15 bg-white/[0.04] px-5 text-xs font-black uppercase tracking-[0.14em] text-white transition hover:border-white/30 hover:bg-white/[0.08]">
+                            Seguir comprando
+                            <span class="material-symbols-outlined text-base">add</span>
+                        </a>
+                        <button type="button" @click="clearCart()"
+                            class="inline-flex min-h-11 items-center justify-center gap-2 border border-red-300/20 bg-red-500/10 px-5 text-xs font-black uppercase tracking-[0.14em] text-red-100 transition hover:border-red-300/35 hover:bg-red-500/15">
+                            Vaciar
+                            <span class="material-symbols-outlined text-base">delete_sweep</span>
                         </button>
                     </div>
-                </template>
-            </div>
+                </div>
 
-            <!-- Resumen -->
-            <div class="w-full lg:w-80 shrink-0">
-                <div class="glass-card rounded-3xl p-6 sticky top-24">
-                    <h3 class="text-lg font-bold text-white mb-6 border-b border-white/5 pb-4">Resumen</h3>
-                    <div class="flex justify-between items-center mb-4 text-sm">
-                        <span class="text-on-surface-variant font-medium">Subtotal</span>
-                        <span class="text-white font-bold">S/ <span x-text="cartTotal"></span></span>
-                    </div>
-                    <!-- TODO: Descuentos, taxes if apply -->
-                    <div class="flex justify-between items-center py-4 border-t border-white/10 mb-6">
-                        <span class="text-white font-black text-lg">Total</span>
-                        <span class="text-secondary font-black text-2xl">S/ <span x-text="cartTotal"></span></span>
+                <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+                    <div class="space-y-4">
+                        <template x-for="item in items" :key="item.id">
+                            <article class="group overflow-hidden border border-white/10 bg-[#11131b] transition hover:border-white/25">
+                                <div class="grid gap-0 sm:grid-cols-[220px_1fr]">
+                                    <div class="relative min-h-[190px] overflow-hidden bg-[#10121a]">
+                                        <img :src="cartImage(item)" :alt="item.nombre"
+                                            @error="$event.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=85&w=900'"
+                                            class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent"></div>
+                                        <p class="absolute bottom-4 left-4 bg-white px-3 py-2 text-sm font-black text-black">
+                                            S/ <span x-text="formatMoney(item.precio)"></span>
+                                        </p>
+                                    </div>
+
+                                    <div class="flex min-h-[190px] flex-col justify-between p-5">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div class="min-w-0">
+                                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-secondary">Producto</p>
+                                                <h3 class="mt-2 text-2xl font-black leading-tight text-white" x-text="item.nombre"></h3>
+                                            </div>
+                                            <button type="button" @click="removeItem(item.id)"
+                                                class="shrink-0 border border-white/10 bg-white/[0.035] p-3 text-white/55 transition hover:border-red-300/30 hover:bg-red-500/10 hover:text-red-200"
+                                                aria-label="Quitar producto">
+                                                <span class="material-symbols-outlined text-xl">delete</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5">
+                                            <div>
+                                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Cantidad</p>
+                                                <div class="mt-2 inline-flex items-center border border-white/12 bg-white/[0.04]">
+                                                    <button type="button" @click="updateQuantity(item.id, parseInt(item.cantidad) - 1)"
+                                                        class="flex h-11 w-11 items-center justify-center text-white/70 transition hover:bg-white/10 hover:text-white">
+                                                        <span class="material-symbols-outlined text-base">remove</span>
+                                                    </button>
+                                                    <span class="w-12 select-none text-center text-sm font-black text-white" x-text="item.cantidad"></span>
+                                                    <button type="button" @click="updateQuantity(item.id, parseInt(item.cantidad) + 1)"
+                                                        class="flex h-11 w-11 items-center justify-center text-white/70 transition hover:bg-white/10 hover:text-white">
+                                                        <span class="material-symbols-outlined text-base">add</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="text-right">
+                                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Subtotal</p>
+                                                <p class="mt-2 text-2xl font-black text-white">
+                                                    S/ <span x-text="lineTotal(item)"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </template>
                     </div>
 
-                    <a href="{% url 'clientes:checkout' %}"
-                        class="btn-primary block w-full py-4 text-center rounded-2xl font-bold uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(198,191,255,0.3)]">
-                        Ir a Pagar
-                    </a>
+                    <aside class="lg:sticky lg:top-24">
+                        <div class="border border-white/10 bg-[#11131b] p-5">
+                            <p class="text-[11px] font-black uppercase tracking-[0.24em] text-[#f0c15a]">Resumen</p>
+                            <h3 class="mt-2 text-2xl font-black text-white">Total del pedido</h3>
+                            <p class="mt-4 text-sm leading-7 text-white/55">
+                                Revisa tu orden antes de continuar al pago.
+                            </p>
+
+                            <div class="my-6 space-y-4 border-y border-white/10 py-5 text-sm">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-white/45">Productos</span>
+                                    <span class="font-black text-white" x-text="itemCount"></span>
+                                </div>
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-white/45">Subtotal</span>
+                                    <span class="font-black text-white">S/ <span x-text="cartTotal"></span></span>
+                                </div>
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-white/45">Servicio</span>
+                                    <span class="font-black text-secondary">Por confirmar</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-end justify-between gap-4">
+                                <span class="text-lg font-black text-white">Total</span>
+                                <span class="text-3xl font-black text-secondary">S/ <span x-text="cartTotal"></span></span>
+                            </div>
+
+                            <a href="{% url 'clientes:checkout' %}"
+                                class="btn-primary mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 px-5 text-xs font-black uppercase tracking-[0.16em]">
+                                Ir a pagar
+                                <span class="material-symbols-outlined text-base">arrow_forward</span>
+                            </a>
+
+                            <div class="mt-4 border border-white/10 bg-white/[0.035] p-4">
+                                <div class="flex gap-3">
+                                    <span class="material-symbols-outlined text-secondary">verified</span>
+                                    <p class="text-sm leading-6 text-white/58">
+                                        Tu pedido se mantiene guardado en este dispositivo hasta finalizar la compra.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </div>
-        </div>
-    </template>
-
+        </template>
+    </section>
 </div>
 {% endblock %}

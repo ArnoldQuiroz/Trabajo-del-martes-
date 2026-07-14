@@ -63,14 +63,18 @@ class CustomWebLoginView(AuthLoginView):
 
     def get_success_url(self):
         url = self.get_redirect_url()
-        if url:
-            return url
         if hasattr(self.request.user, 'rol') and self.request.user.rol:
             rol = self.request.user.rol.nombre
+            if rol == 'CLIENTE':
+                if url and url.startswith('/clientes/'):
+                    return url
+                return '/clientes/mis-reservas/'
             if rol == 'ADMIN':
                 return '/admin-panel/reportes/'
             elif rol != 'CLIENTE':
                 return '/dashboard/'
+        if url:
+            return url
         return '/'
 
 class DocumentacionView(LoginRequiredMixin, TemplateView):
